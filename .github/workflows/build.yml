@@ -1,0 +1,31 @@
+name: Build Katalist Launcher
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - name: Install dependencies
+        run: npm install
+      - name: Build Vite
+        run: npm run vite:build
+      - name: Build Electron
+        run: npx electron-builder --win --x64
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Upload exe
+        uses: actions/upload-artifact@v4
+        with:
+          name: KatalistLauncher-Windows
+          path: dist-electron/*.exe
+          retention-days: 30
